@@ -13,36 +13,82 @@ public class ShopMgr : MonoBehaviour
 
 
     public GameObject prefabSource;
-    public GameObject pool;
+    public GameObject pool; //target  
+
+    public GameObject itemPool;
 
     // Start is called before the first frame update
     void Start()
     {
-        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(System.String.Format("https://sheets.googleapis.com/v4/spreadsheets/1FZi9sG2o9FGkJvyYo8nuhyCeVGfcRqNwUuSzUMddt0M/values/%E5%B7%A5%E4%BD%9C%E8%A1%A81!A2:D100?key=AIzaSyAqD-STHxwk6_g30gv6k8-A6WsTZ2ig1dE"));
-        HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-        StreamReader reader = new StreamReader(response.GetResponseStream());
-        string jsonResponse = reader.ReadToEnd();
-        Debug.Log(jsonResponse);
+        //
+        InstantiateObjectToItemPool();
 
-        GoogleSheetEntiy source = JsonConvert.DeserializeObject<GoogleSheetEntiy>(jsonResponse);
-
-        List<ItemEntiy> data = ItemEntiy.FromSheetEntiy(source);
+        List<ItemEntiy> data = GetDataFromGoogleSheet();
 
         foreach (var item in data)
         {
-            GameObject target = Instantiate(prefabSource);
+            GameObject target = GetGameObjectFromItemPool(item);
+            
             target.transform.parent = pool.transform;
             //reset
             target.transform.localScale = Vector3.one;
-
-            //fill data
-            CardHander _card = target.GetComponent<CardHander>();
+        }
+    }
+    
+    private GameObject GetGameObjectFromItemPool(ItemEntiy item)
+    {
+        GameObject result = null;
+        try
+        {
+            result = itemPool.transform.GetChild(0).gameObject;
+             //fill data
+            CardHander _card = result.GetComponent<CardHander>();
             _card.ShopItem = spriteMgr.sprites[(int)Random.Range(0, 6)];
-            _card.Amount =(int)item.amount;
+            _card.Amount = (int)item.amount;
             _card.Product = item.name;
             _card.Cost = (int)item.price;
         }
+        catch (System.Exception exp)
+        {
+            Debug.LogError(exp.ToString());
+            throw;
+        }
+        return result;
     }
+
+    private void InstantiateObjectToItemPool()
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            GameObject target = Instantiate(prefabSource);
+            target.transform.parent = itemPool.transform;
+        }
+
+    }
+
+    private List<ItemEntiy> GetDataFromGoogleSheet()
+    {
+        List<ItemEntiy> result = new List<ItemEntiy>();
+        try
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(System.String.Format("https://sheets.googleapis.com/v4/spreadsheets/1FZi9sG2o9FGkJvyYo8nuhyCeVGfcRqNwUuSzUMddt0M/values/%E5%B7%A5%E4%BD%9C%E8%A1%A81!A2:D100?key=AIzaSyAqD-STHxwk6_g30gv6k8-A6WsTZ2ig1dE"));
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            StreamReader reader = new StreamReader(response.GetResponseStream());
+            string jsonResponse = reader.ReadToEnd();
+            Debug.Log(jsonResponse);
+
+            GoogleSheetEntiy source = JsonConvert.DeserializeObject<GoogleSheetEntiy>(jsonResponse);
+
+            result = ItemEntiy.FromSheetEntiy(source);
+        }
+        catch (System.Exception exp)
+        {
+            Debug.LogError(exp.ToString());
+            throw;
+        }
+        return result;
+    }
+
 
     // Update is called once per frame
     void Update()
