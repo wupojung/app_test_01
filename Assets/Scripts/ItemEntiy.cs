@@ -5,6 +5,7 @@ using UnityEngine;
 public class ItemEntiy
 {
     public int id;
+    public int spriteIndex;
     public string name;
     public float amount;
     public float price;
@@ -18,9 +19,10 @@ public class ItemEntiy
             {
                 ItemEntiy temp = new ItemEntiy();
                 temp.id = int.Parse(value[0]);
-                temp.name = value[1];
-                temp.amount = float.Parse(value[2]);
-                temp.price = float.Parse(value[3]);
+                temp.spriteIndex = int.Parse(value[1]);
+                temp.name = value[2];
+                temp.amount = float.Parse(value[3]);
+                temp.price = float.Parse(value[4]);
 
                 result.Add(temp);
             }

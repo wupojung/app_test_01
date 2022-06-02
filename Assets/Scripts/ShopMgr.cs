@@ -28,22 +28,22 @@ public class ShopMgr : MonoBehaviour
         foreach (var item in data)
         {
             GameObject target = GetGameObjectFromItemPool(item);
-            
+
             target.transform.parent = pool.transform;
             //reset
             target.transform.localScale = Vector3.one;
         }
     }
-    
+
     private GameObject GetGameObjectFromItemPool(ItemEntiy item)
     {
         GameObject result = null;
         try
         {
             result = itemPool.transform.GetChild(0).gameObject;
-             //fill data
+            //fill data
             CardHander _card = result.GetComponent<CardHander>();
-            _card.ShopItem = spriteMgr.sprites[(int)Random.Range(0, 6)];
+            _card.ShopItem = spriteMgr.sprites[item.spriteIndex];
             _card.Amount = (int)item.amount;
             _card.Product = item.name;
             _card.Cost = (int)item.price;
@@ -58,7 +58,7 @@ public class ShopMgr : MonoBehaviour
 
     private void InstantiateObjectToItemPool()
     {
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 10; i++)
         {
             GameObject target = Instantiate(prefabSource);
             target.transform.parent = itemPool.transform;
@@ -71,7 +71,7 @@ public class ShopMgr : MonoBehaviour
         List<ItemEntiy> result = new List<ItemEntiy>();
         try
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(System.String.Format("https://sheets.googleapis.com/v4/spreadsheets/1FZi9sG2o9FGkJvyYo8nuhyCeVGfcRqNwUuSzUMddt0M/values/%E5%B7%A5%E4%BD%9C%E8%A1%A81!A2:D100?key=AIzaSyAqD-STHxwk6_g30gv6k8-A6WsTZ2ig1dE"));
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(System.String.Format("https://sheets.googleapis.com/v4/spreadsheets/1FZi9sG2o9FGkJvyYo8nuhyCeVGfcRqNwUuSzUMddt0M/values/%E5%B7%A5%E4%BD%9C%E8%A1%A81!A2:E100?key=AIzaSyAqD-STHxwk6_g30gv6k8-A6WsTZ2ig1dE"));
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             StreamReader reader = new StreamReader(response.GetResponseStream());
             string jsonResponse = reader.ReadToEnd();
@@ -98,26 +98,11 @@ public class ShopMgr : MonoBehaviour
 
     void OnGUI()
     {
-        if (GUI.Button(new Rect(10, 70, 50, 30), "Click"))
+        if (GUI.Button(new Rect(10, 100, 50, 30), "-"))
         {
-            cardHander.Amount = 888;
-            cardHander.Cost = 500;
-            cardHander.Product = "很貴的東西";
-            cardHander.ShopItem = spriteMgr.sprites[0];
-        }
-        if (GUI.Button(new Rect(10, 100, 50, 30), "+"))
-        {
-            GameObject target = Instantiate(prefabSource);
-            target.transform.parent = pool.transform;
-            //reset
-            target.transform.localScale = Vector3.one;
+            // item 1  --> item pool 
+            pool.transform.GetChild(0).parent = itemPool.transform;
 
-            //fill data
-            CardHander _card = target.GetComponent<CardHander>();
-            _card.ShopItem = spriteMgr.sprites[(int)Random.Range(0, 6)];
-            _card.Amount = (int)Random.Range(100, 999);
-            _card.Product = "很貴的東西" + (int)Random.Range(0, 6);
-            _card.Cost = (int)Random.Range(10, 9999);
         }
     }
 }
